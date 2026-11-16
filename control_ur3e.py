@@ -69,7 +69,7 @@ ACEL_LIN_JOG = 0.25
 ACEL_ROT_JOG = 1.0
 AVISO_DIST_MM = 100.0
 AVISO_GIRO = 30.0
-MARGEN_SINGULAR = 10.0
+MARGEN_SINGULAR = 15.0          # cerca de una singularidad se BLOQUEAN movel/speedl (ver fallo C306A3)
 
 # Gripper Robotiq
 REG_GRIPPER = 128               # 128 STA, 129 POS, 130 OBJ, 131 paso del script, 132 nº de orden terminada
@@ -1273,7 +1273,8 @@ class App:
         elif listo and self.modo == "tcp":
             sing = aviso_singularidad(est["q"])
             if sing:
-                aviso = f"⚠  Cerca de una singularidad ({sing}): los movimientos en línea recta pueden detener el robot."
+                aviso = (f"⚠  Cerca de una singularidad ({sing}): movimientos de la herramienta bloqueados. "
+                         "Dobla el codo y aleja la Muñeca 2 de 0°/180° en Articulaciones.")
         self.aviso.config(text=aviso)
 
         for b in (self.btn_abrir, self.btn_cerrar, self.btn_home, self.btn_ir):
@@ -1529,6 +1530,12 @@ class App:
                     else:
                         b.config(bg=GRIS, fg=DESACT)
 
+            if tcp and any(dirs) and aviso_singularidad(est["q"]):
+                # En una singularidad, seguir una línea recta exige aceleraciones imposibles y el
+                # robot se detiene con un fallo (C306A3). Bloqueamos y, si ya se movía, se frena.
+                dirs = [0] * 6
+                self.mensaje.set("Herramienta bloqueada: el robot está cerca de una singularidad. "
+                                 "Dobla el codo y aleja la Muñeca 2 de 0°/180° en la pestaña Articulaciones.")
             tipo = ("tcp" if tcp else "art") if any(dirs) else ("art" if qd_mano else None)
             if self.jog_en_curso and tipo != self.jog_en_curso:
                 self.enviar(SCRIPT_PARAR_L if self.jog_en_curso == "tcp" else SCRIPT_PARAR)
@@ -1716,6 +1723,13 @@ class App:
         est = self.est()
         if not self.robot_listo(est):
             self.mensaje.set("El robot no está listo.")
+            return False
+        sing = aviso_singularidad(est["q"])
+        if sing:
+            messagebox.showwarning("Cerca de una singularidad",
+                                   f"No se puede mover la herramienta en línea recta: {sing}.\n\n"
+                                   "Primero, en la pestaña Articulaciones, dobla el codo (unos 90°) y aleja "
+                                   "la Muñeca 2 de 0° y de 180° (por ejemplo, a -90°).")
             return False
         R = rotvec_a_matriz([math.radians(a) for a in rv_grados])
         off = est.get("tcp_offset", [0.0] * 6)

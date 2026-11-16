@@ -7,7 +7,7 @@ Programa en Python con interfaz gráfica para controlar un brazo colaborativo **
 ## Funciones
 
 - **Articulaciones**: lectura en tiempo real y movimiento mientras se mantiene pulsado − / + (ratón o teclado).
-- **Herramienta (TCP)**: movimiento cartesiano X, Y, Z y giros, en ejes de la base o de la herramienta, con aviso de singularidades.
+- **Herramienta (TCP)**: movimiento cartesiano X, Y, Z y giros, en ejes de la base o de la herramienta. Se bloquea cerca de una singularidad (codo o Muñeca 2 a menos de 15° de 0°/180°) para evitar fallos como C306A3.
 - **Ir a una posición exacta**: `movej` (articulaciones) o `movel` (línea recta), con confirmación en movimientos grandes.
 - **Gripper Robotiq**: abrir, cerrar, fuerza (baja / media / alta) y estado (abierto, cerrado, sujetando objeto).
 - **Posiciones**: guardar posiciones con nombre (incluido el estado del gripper), volver a ellas y botón **Home**.
@@ -90,6 +90,31 @@ Junto a `control_ur3e.py` (no se suben al repositorio):
 - `posiciones_ur3e.json`: posiciones guardadas y Home.
 - `capturas/`: fotos de la cámara con su JSON de posición del robot.
 - `errores_ur3e.log`: registro de errores, si los hay.
+
+## Taller paso a paso (`taller_ur3e/`)
+
+Versión didáctica del programa, dividida en 10 pasos cortos y comentados línea a línea, pensada para un taller de robótica de primer año de ingeniería. Cada paso se ejecuta por separado:
+
+| Archivo | Qué hace |
+|---|---|
+| `ur_basico.py` | biblioteca mínima: conexión por el puerto 30002, lectura del estado y URScript |
+| `p01_conexion.py` | comprobar la conexión con el robot |
+| `p02_leer_estado.py` | leer articulaciones, herramienta y estado |
+| `p03_movej.py` | primer movimiento con `movej` |
+| `p04_speedj.py` | movimiento continuo y seguro con `speedj` (perro guardián) |
+| `p05_interfaz.py` | primera interfaz gráfica (tkinter) con botones y teclado |
+| `p06_herramienta.py` | mover la herramienta (TCP) con `movel` |
+| `p07_gripper.py` | controlar el gripper Robotiq |
+| `p08_posiciones.py` | guardar posiciones y volver a ellas (JSON) |
+| `p09_camara.py` | ver la cámara con OpenCV y capturar fotos |
+| `p10_seguir_mano.py` | seguir la mano con MediaPipe |
+
+```bash
+cd taller_ur3e
+python p01_conexion.py
+```
+
+Para `p10_seguir_mano.py`, copia la carpeta `modelos/` (con `hand_landmarker.task`) dentro de `taller_ur3e/`.
 
 ## Licencia
 
