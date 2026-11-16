@@ -1,0 +1,3 @@
+# Necesario solo para la cámara y el seguimiento de mano.
+# El control del robot y del gripper funciona solo con la biblioteca estándar de Python.
+mediapipe>=1.2      # instala también opencv-contrib-python y numpy

@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+
+# Datos locales del usuario (no se suben)
+posiciones_ur3e.json
+posiciones_ur3e.json.tmp
+capturas/
+errores_ur3e.log
+
+# Modelo de MediaPipe (se descarga aparte, ver README)
+modelos/
+
+# Manuales y documentos (copyright de terceros / documentos personales)
+manual_ur3e/
+*.pdf
+*.docx
