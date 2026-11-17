@@ -15,6 +15,18 @@ Programa en Python con interfaz gráfica para controlar un brazo colaborativo **
 - **Seguimiento de mano** (MediaPipe): el robot sigue los movimientos de la mano delante de la cámara.
 - **PARAR** siempre visible (también con Espacio o Esc).
 
+## Descargar instalador (Windows)
+
+La forma más fácil de usarlo: **[descarga el instalador de la última versión](https://github.com/matiTCP/control_ur3e_simple/releases/latest)** (`Instalar_Control_UR3e_<versión>.exe`, en *Assets*). No hace falta Python ni permisos de administrador.
+
+1. Abre el instalador. Si aparece «Windows protegió su PC», pulsa **Más información → Ejecutar de todas formas** (el instalador no está firmado).
+2. Elige **Instalar solo para mí** y sigue el asistente.
+3. Abre **Control UR3e** desde el menú Inicio o el escritorio.
+
+Las posiciones, capturas y errores se guardan en `Documentos\Control UR3e`. Se desinstala desde Configuración → Aplicaciones.
+
+Para usar o modificar el código fuente, sigue los pasos de [Instalación](#instalación).
+
 ## Requisitos
 
 **Robot**
@@ -24,7 +36,7 @@ Programa en Python con interfaz gráfica para controlar un brazo colaborativo **
 - Para el gripper: URCap de Robotiq instalada.
 
 **PC**
-- Windows 10/11 y Python 3.10 o superior (probado con 3.12).
+- Windows 10/11 y Python 3.10 o superior (probado con 3.12). Con el instalador no hace falta Python.
 - PC y robot en la misma red.
 - Opcional: webcam para la cámara y el seguimiento de mano.
 
