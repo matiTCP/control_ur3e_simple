@@ -122,13 +122,27 @@ Versión didáctica del programa, dividida en 10 pasos cortos y comentados líne
 | `p08_posiciones.py` | guardar posiciones y volver a ellas (JSON) |
 | `p09_camara.py` | ver la cámara con OpenCV y capturar fotos |
 | `p10_seguir_mano.py` | seguir la mano con MediaPipe |
+| `mano_robot.py` | **taller corto**: programa mínimo que mueve una articulación con la mano frente a la cámara |
 
 ```bash
 cd taller_ur3e
 python p01_conexion.py
 ```
 
-Para `p10_seguir_mano.py`, copia la carpeta `modelos/` (con `hand_landmarker.task`) dentro de `taller_ur3e/`.
+Para `p10_seguir_mano.py` y `mano_robot.py`, copia la carpeta `modelos/` (con `hand_landmarker.task`) dentro de `taller_ur3e/`.
+
+### Taller corto: mover el robot con la cámara
+
+`mano_robot.py` es un programa corto para un taller de pocas horas. Si la mano está a la izquierda o a la derecha del centro de la imagen, una articulación gira en un sentido u otro. Si está en el centro o fuera de la imagen, el robot se detiene. Sin `--robot` funciona en **modo prueba** y no mueve nada:
+
+```bash
+python -m pip install mediapipe
+cd taller_ur3e
+python mano_robot.py            # modo prueba: solo muestra la velocidad
+python mano_robot.py --robot    # mueve el robot (zona despejada y parada de emergencia al alcance)
+```
+
+Al inicio del programa se pueden cambiar `ARTICULACION` (0 Base … 5 Muñeca 3), `VEL_MAX` (°/s) y `ZONA` (tamaño de la zona central).
 
 ## Generar el instalador (`instalador/`)
 
