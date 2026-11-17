@@ -51,6 +51,7 @@ Invoke-WebRequest -Uri "https://storage.googleapis.com/mediapipe-models/hand_lan
 python control_ur3e.py                 # IP por defecto: 192.168.0.15
 python control_ur3e.py 192.168.0.20    # otra IP
 python control_ur3e.py --leer          # solo muestra la posición actual (no mueve nada)
+python control_ur3e.py --diagnostico   # comprueba cámara y MediaPipe sin conectarse al robot (diagnostico.txt)
 ```
 
 La IP también se puede cambiar desde el botón ⚙ de la ventana.
@@ -85,11 +86,12 @@ Activa **Teclado** en la cabecera y mantén pulsada la tecla:
 
 ## Archivos que crea el programa
 
-Junto a `control_ur3e.py` (no se suben al repositorio):
+Junto a `control_ur3e.py` (no se suben al repositorio). Si el programa está empaquetado como `.exe` (PyInstaller), se guardan en `Documentos\Control UR3e`:
 
 - `posiciones_ur3e.json`: posiciones guardadas y Home.
 - `capturas/`: fotos de la cámara con su JSON de posición del robot.
 - `errores_ur3e.log`: registro de errores, si los hay.
+- `diagnostico.txt`: resultado de `--diagnostico`.
 
 ## Taller paso a paso (`taller_ur3e/`)
 

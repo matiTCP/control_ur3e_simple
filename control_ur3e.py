@@ -12,6 +12,7 @@ Uso:
     python control_ur3e.py                 -> abre la ventana (IP por defecto 192.168.0.15)
     python control_ur3e.py 192.168.0.20    -> abre la ventana con otra IP
     python control_ur3e.py --leer [IP]     -> imprime la posición actual y sale (no mueve nada)
+    python control_ur3e.py --diagnostico   -> comprueba cámara y MediaPipe (escribe diagnostico.txt)
 
 Mover: mantener pulsado − / + en la ventana, o activar «Teclado» y mantener la tecla:
     Q/A · W/S · E/D · R/F · T/G · Y/H  (una pareja por fila)
@@ -80,14 +81,35 @@ GRIPPER_ABIERTO, GRIPPER_CERRADO = 0, 255
 PERIODO_JOG_MS = 100
 VIDA_ORDEN_JOG = 0.3
 
-# Posiciones guardadas (archivo junto al programa)
-CARPETA = os.path.dirname(os.path.abspath(__file__))
+def carpeta_documentos():
+    """Carpeta «Documentos» del usuario (aunque OneDrive la haya movido)."""
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            buf = ctypes.create_unicode_buffer(260)
+            if ctypes.windll.shell32.SHGetFolderPathW(None, 5, None, 0, buf) == 0:   # 5 = CSIDL_PERSONAL
+                return buf.value
+        except (ImportError, AttributeError, OSError):
+            pass
+    return os.path.expanduser("~")
+
+
+# Como script (.py) todo va junto al programa. Como programa instalado (.exe de PyInstaller) la carpeta del
+# programa no es para datos: los recursos van dentro del paquete y los datos en Documentos\Control UR3e.
+if getattr(sys, "frozen", False):
+    CARPETA_RECURSOS = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+    CARPETA = os.path.join(carpeta_documentos(), "Control UR3e")
+    os.makedirs(CARPETA, exist_ok=True)
+else:
+    CARPETA_RECURSOS = CARPETA = os.path.dirname(os.path.abspath(__file__))
+
+# Posiciones guardadas
 ARCHIVO_POS = os.path.join(CARPETA, "posiciones_ur3e.json")
 CARPETA_CAPTURAS = os.path.join(CARPETA, "capturas")
 MAX_CAMARAS = 4
 
 # Seguimiento de mano (MediaPipe Hand Landmarker)
-MODELO_MANO = os.path.join(CARPETA, "modelos", "hand_landmarker.task")
+MODELO_MANO = os.path.join(CARPETA_RECURSOS, "modelos", "hand_landmarker.task")
 ZONA_MUERTA = 0.18              # fracción de media pantalla en la que la mano no mueve el robot
 VIDA_VEL_MANO = 0.3            # s: si el visor deja de actualizar, se ignora la última velocidad
 HOME_FABRICA = [0.0, -90.0, 0.0, -90.0, 0.0, 0.0]   # Home por defecto de Universal Robots (brazo vertical)
@@ -331,6 +353,11 @@ CONEXIONES_MANO = [(0, 1), (1, 2), (2, 3), (3, 4), (0, 5), (5, 6), (6, 7), (7, 8
                    (11, 12), (9, 13), (13, 14), (14, 15), (15, 16), (13, 17), (17, 18), (18, 19), (19, 20), (0, 17)]
 
 
+def leer_bytes(ruta):
+    with open(ruta, "rb") as f:
+        return f.read()
+
+
 class DetectorManoMP:
     """Detección de la mano con MediaPipe Hand Landmarker (21 puntos por mano)."""
 
@@ -353,7 +380,8 @@ class DetectorManoMP:
             return
         try:
             opciones = vision.HandLandmarkerOptions(
-                base_options=BaseOptions(model_asset_path=MODELO_MANO),
+                # El modelo se pasa en memoria: MediaPipe falla con rutas con tildes o ñ (p. ej. C:\Users\Matías)
+                base_options=BaseOptions(model_asset_buffer=leer_bytes(MODELO_MANO)),
                 running_mode=vision.RunningMode.VIDEO, num_hands=1,
                 min_hand_detection_confidence=0.6, min_hand_presence_confidence=0.6,
                 min_tracking_confidence=0.5)
@@ -1022,6 +1050,12 @@ class App:
         self._buscar_camaras()
 
         root.title("Control UR3e")
+        icono = os.path.join(CARPETA_RECURSOS, "icono.ico")     # solo existe en la versión instalada
+        if os.path.exists(icono):
+            try:
+                root.iconbitmap(default=icono)
+            except tk.TclError:
+                pass
         root.configure(bg=BG)
         root.minsize(940, 640)
         root.protocol("WM_DELETE_WINDOW", self.cerrar)
@@ -1919,11 +1953,30 @@ def modo_leer(ip):
         print("Aviso singularidad:", sing)
 
 
+def modo_diagnostico():
+    """Comprueba cámara y MediaPipe sin conectarse al robot. Escribe diagnostico.txt en la carpeta de datos."""
+    lineas = [f"Control UR3e - diagnóstico {time.strftime('%Y-%m-%d %H:%M:%S')}",
+              f"Python {sys.version.split()[0]} | instalado (.exe): {bool(getattr(sys, 'frozen', False))}",
+              f"Carpeta de datos: {CARPETA}",
+              f"OpenCV: {cv2.__version__ if cv2 else 'NO disponible'}"]
+    det = DetectorManoMP()
+    lineas.append("MediaPipe (mano): " + ("OK" if det.det is not None else f"ERROR - {det.error}"))
+    if cv2 is not None:
+        lineas.append(f"Cámaras: {detectar_camaras() or 'ninguna'}")
+    texto = "\n".join(lineas)
+    with open(os.path.join(CARPETA, "diagnostico.txt"), "w", encoding="utf-8") as f:
+        f.write(texto + "\n")
+    print(texto)
+    return 0 if det.det is not None else 1
+
+
 def main():
     args = sys.argv[1:]
     if args and args[0] == "--leer":
         modo_leer(args[1] if len(args) > 1 else IP_POR_DEFECTO)
         return
+    if args and args[0] == "--diagnostico":
+        sys.exit(modo_diagnostico())
     try:  # texto nítido en pantallas con escalado (Windows)
         import ctypes
         ctypes.windll.shcore.SetProcessDpiAwareness(1)
