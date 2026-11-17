@@ -12,6 +12,10 @@ diagnostico.txt
 # Modelo de MediaPipe (se descarga aparte, ver README)
 modelos/
 
+# Instalador compilado (se publica en GitHub Releases, no en el repositorio)
+instalador/salida/
+*.exe
+
 # Manuales y documentos (copyright de terceros / documentos personales)
 manual_ur3e/
 *.pdf

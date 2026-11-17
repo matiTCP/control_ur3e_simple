@@ -130,6 +130,23 @@ python p01_conexion.py
 
 Para `p10_seguir_mano.py`, copia la carpeta `modelos/` (con `hand_landmarker.task`) dentro de `taller_ur3e/`.
 
+## Generar el instalador (`instalador/`)
+
+El instalador de Windows se construye con [PyInstaller](https://pyinstaller.org) e [Inno Setup 6](https://jrsoftware.org/isinfo.php):
+
+```powershell
+winget install JRSoftware.InnoSetup          # solo la primera vez
+powershell -ExecutionPolicy Bypass -File instalador\construir.ps1 -Version 1.0.1
+```
+
+El script crea un entorno de Python aparte en `%LOCALAPPDATA%\ControlUR3e-build` (con MediaPipe y PyInstaller), descarga el modelo de la mano si falta y deja el resultado en `instalador\salida\Instalar_Control_UR3e_<versión>.exe`. Ese archivo no se sube al repositorio: se publica como [Release](https://github.com/matiTCP/control_ur3e_simple/releases).
+
+| Archivo | Qué es |
+|---|---|
+| `construir.ps1` | compila el programa y el instalador |
+| `control_ur3e.iss` | configuración de Inno Setup (instalación por usuario, sin administrador) |
+| `icono.ico` / `crear_icono.py` | icono del programa y el script que lo genera |
+
 ## Licencia
 
 [MIT](LICENSE) © 2026 matiTCP. Puedes usar, modificar y redistribuir el código manteniendo el aviso de copyright.
@@ -137,4 +154,4 @@ Para `p10_seguir_mano.py`, copia la carpeta `modelos/` (con `hand_landmarker.tas
 ### Terceros y marcas
 
 - *Universal Robots*, *UR3e* y *PolyScope* son marcas de Universal Robots A/S. *Robotiq* es marca de Robotiq Inc. Este proyecto es independiente y **no está afiliado, patrocinado ni respaldado** por esas empresas.
-- [MediaPipe](https://github.com/google-ai-edge/mediapipe) (incluido el modelo Hand Landmarker) y [OpenCV](https://opencv.org) se distribuyen bajo la licencia Apache 2.0 y se instalan aparte; no se incluyen en este repositorio.
+- [MediaPipe](https://github.com/google-ai-edge/mediapipe) (incluido el modelo Hand Landmarker) y [OpenCV](https://opencv.org) se distribuyen bajo la licencia Apache 2.0. No se incluyen en este repositorio; el instalador de Windows sí los incluye, con sus licencias.
